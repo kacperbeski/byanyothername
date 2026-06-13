@@ -219,6 +219,12 @@ html.spotlight-on * {
   max-width: 44rem;
 }
 
+/* each sentence is its own block so within-sentence lines and the
+   gap between sentences can be tuned independently (esp. on mobile) */
+.tagline-line {
+  display: block;
+}
+
 /* ——— about ——— */
 
 .about-statement {
@@ -309,6 +315,10 @@ html.spotlight-on * {
 }
 
 /* ——— clients: one line, right to left, forever ——— */
+
+/* one long line on desktop, three shorter lines on mobile */
+.clients-desktop { display: block; width: 100%; }
+.clients-mobile { display: none; }
 
 .marquee {
   position: relative;
@@ -473,17 +483,31 @@ html.spotlight-on * {
 
 @media (max-width: 640px) {
   /* smaller fonts on phones */
-  :root { --text: 11px; }
-  .bottom-center { padding: 16px 10px; font-size: 5px; }
-  .scroll-hint { font-size: 7px; }
-  .service ul { font-size: 8px; }
-  .team-bio { font-size: 8px; }
+  :root { --text: 13px; }
+  .bottom-center { padding: 16px 10px; font-size: 6px; }
+  .scroll-hint { font-size: 8px; }
+  .service ul { font-size: 9px; }
+  .team-bio { font-size: 9px; }
 
   .services { flex-direction: column; align-items: center; gap: 28px; }
   .service { min-height: 0; }
   .team-names { flex-direction: column; gap: 30px; }
   .team-detail img { width: 130px; }
-  .tagline { line-height: 2.6; }
+
+  /* tagline: tight spacing within a sentence, larger gap between sentences */
+  .tagline { line-height: 1.5; }
+  .tagline-line { line-height: 1.5; }
+  .tagline-line + .tagline-line { margin-top: 1.5em; }
+
+  /* clients: switch to three shorter auto-scrolling rows */
+  .clients-desktop { display: none; }
+  .clients-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 2.4vh, 18px);
+    width: 100%;
+  }
+  .clients-mobile .marquee-track { animation-duration: 46s; }
 }
 
 /* The marquee + stage motion are core to the experience, so they run regardless of

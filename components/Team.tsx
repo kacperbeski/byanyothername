@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { COPY } from "@/lib/stages";
 
@@ -11,6 +11,14 @@ import { COPY } from "@/lib/stages";
 export default function Team() {
   const [active, setActive] = useState<string | null>(null);
   const person = COPY.team.find((p) => p.id === active) ?? null;
+
+  // preload portraits up front so they're decoded and fade in smoothly (no pop-in)
+  useEffect(() => {
+    COPY.team.forEach((p) => {
+      const img = new window.Image();
+      img.src = p.photo;
+    });
+  }, []);
 
   return (
     <div className="team2" onClick={() => setActive(null)}>

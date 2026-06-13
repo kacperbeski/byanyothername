@@ -6,9 +6,8 @@ export default function Tagline() {
   return (
     <div className="center-layer">
       <p className="tagline">
-        {COPY.tagline[0]}
-        <br />
-        {COPY.tagline[1]}
+        <span className="tagline-line">{COPY.tagline[0]}</span>
+        <span className="tagline-line">{COPY.tagline[1]}</span>
       </p>
     </div>
   );

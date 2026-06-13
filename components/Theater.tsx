@@ -30,18 +30,20 @@ function StageLayer({
   z,
   active,
   label,
+  blurScale,
   children,
 }: {
   index: number;
   z: MotionValue<number>;
   active: boolean;
   label: string;
+  blurScale: number;
   children: ReactNode;
 }) {
   const d = useTransform(z, (v) => index - v);
   const opacity = useTransform(d, [-0.72, 0, 0.85], [0, 1, 0]);
-  /* never fully sharp — a faint blur stays even at rest */
-  const blurPx = useTransform(d, [-1, 0, 1], [22, 0.7, 15]);
+  /* never fully sharp — a faint blur stays even at rest (softened on mobile) */
+  const blurPx = useTransform(d, [-1, 0, 1], [22 * blurScale, 0.7 * blurScale, 15 * blurScale]);
   const filter = useMotionTemplate`blur(${blurPx}px)`;
   const scale = useTransform(d, [-1, 0, 1], [1.5, 1, 0.95]);
   const visibility = useTransform(opacity, (o) => (o < 0.012 ? "hidden" : "visible")) as MotionValue<"hidden" | "visible">;
@@ -66,6 +68,17 @@ function StageLayer({
 export default function Theater({ initialStage }: { initialStage: StageId }) {
   const initialIndex = STAGE_ORDER.indexOf(initialStage);
   const reduce = useReducedMotion() ?? false;
+
+  // soften the depth-blur on phones (smaller screens, ~33% less blur)
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  const blurScale = isMobile ? 0.67 : 1;
 
   const rawZ = useMotionValue(initialIndex);
   const z = useSpring(rawZ, { stiffness: 90, damping: 22, mass: 0.7 });
@@ -180,25 +193,25 @@ export default function Theater({ initialStage }: { initialStage: StageId }) {
 
   return (
     <main className="theater">
-      <StageLayer index={0} z={z} active={active === 0} label="Home">
+      <StageLayer index={0} z={z} active={active === 0} label="Home" blurScale={blurScale}>
         <Name showCurtain={initialIndex === 0} reduce={reduce} />
       </StageLayer>
-      <StageLayer index={1} z={z} active={active === 1} label="Home">
+      <StageLayer index={1} z={z} active={active === 1} label="Home" blurScale={blurScale}>
         <Tagline />
       </StageLayer>
-      <StageLayer index={2} z={z} active={active === 2} label="About">
+      <StageLayer index={2} z={z} active={active === 2} label="About" blurScale={blurScale}>
         <About />
       </StageLayer>
-      <StageLayer index={3} z={z} active={active === 3} label="Services">
+      <StageLayer index={3} z={z} active={active === 3} label="Services" blurScale={blurScale}>
         <Services reduce={reduce} active={active === 3} />
       </StageLayer>
-      <StageLayer index={4} z={z} active={active === 4} label="Clients">
+      <StageLayer index={4} z={z} active={active === 4} label="Clients" blurScale={blurScale}>
         <Clients />
       </StageLayer>
-      <StageLayer index={5} z={z} active={active === 5} label="Team">
+      <StageLayer index={5} z={z} active={active === 5} label="Team" blurScale={blurScale}>
         <Team />
       </StageLayer>
-      <StageLayer index={6} z={z} active={active === 6} label="Contact">
+      <StageLayer index={6} z={z} active={active === 6} label="Contact" blurScale={blurScale}>
         <Contact reduce={reduce} active={active === 6} />
       </StageLayer>
 
