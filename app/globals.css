@@ -472,12 +472,12 @@ html.spotlight-on * {
 /* ——— responsive ——— */
 
 @media (max-width: 640px) {
-  /* fonts ~50% smaller on phones */
-  :root { --text: 8px; }
-  .bottom-center { padding: 16px 10px; font-size: 4px; }
-  .scroll-hint { font-size: 5px; }
-  .service ul { font-size: 6px; }
-  .team-bio { font-size: 6px; }
+  /* smaller fonts on phones */
+  :root { --text: 11px; }
+  .bottom-center { padding: 16px 10px; font-size: 5px; }
+  .scroll-hint { font-size: 7px; }
+  .service ul { font-size: 8px; }
+  .team-bio { font-size: 8px; }
 
   .services { flex-direction: column; align-items: center; gap: 28px; }
   .service { min-height: 0; }
