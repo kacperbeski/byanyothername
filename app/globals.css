@@ -3,8 +3,8 @@
   --ink: #f2f0eb;
   --ink-dim: #8a877f;
   --ink-faint: #45433e;
-  /* Helvetica Neue Heavy, globally. Swap in a licensed webfont file later for non-Mac visitors. */
-  --font-heavy: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* Futura, globally (test). Swap in a licensed webfont file later for non-Mac visitors. */
+  --font-heavy: "Futura", "Futura PT", "Century Gothic", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --weight-heavy: 800;
   /* ~12pt */
   --text: 16px;
@@ -59,7 +59,7 @@ button {
   outline-offset: 4px;
 }
 
-/* ——— spotlight ——— */
+/* ——— spotlight: additive light that follows the cursor ——— */
 
 .spotlight {
   position: fixed;
@@ -68,9 +68,14 @@ button {
   height: 100%;
   pointer-events: none;
   z-index: 65;
+  /* lighten the page beneath instead of drawing on top of it */
+  mix-blend-mode: screen;
+  /* fades in once the effect starts (see appearDelay) */
+  opacity: 0;
+  transition: opacity 1.2s ease;
 }
 
-/* hide the system cursor while the spotlight is active (replaced by the dot) */
+/* hide the OS cursor while the spotlight is active (replaced by the dot) */
 html.spotlight-on,
 html.spotlight-on * {
   cursor: none;
@@ -87,6 +92,19 @@ html.spotlight-on * {
   pointer-events: none;
   z-index: 80;
   will-change: transform;
+}
+
+/* ——— grainient animated background ——— */
+
+.grainient-container,
+.grainient-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ——— grain + vignette ——— */
@@ -181,12 +199,19 @@ html.spotlight-on * {
   color: var(--ink-dim);
 }
 
+/* persistent "by any other name" footer on the middle pages */
+.footer-mark {
+  z-index: 40;
+}
+
 
 /* ——— name (first page) ——— */
 
 .wordmark {
+  /* test: Futura Bold for the logotype */
+  font-family: "Futura", "Futura PT", "Century Gothic", var(--font-heavy);
   font-size: var(--text);
-  font-weight: var(--weight-heavy);
+  font-weight: 700;
   letter-spacing: 0.22em;
   line-height: 1.7;
   text-shadow: 0 0 40px rgba(242, 240, 235, 0.12);
@@ -225,6 +250,11 @@ html.spotlight-on * {
   display: block;
 }
 
+/* center the per-word text animation within each line */
+.tagline-line {
+  text-align: center;
+}
+
 /* ——— about ——— */
 
 .about-statement {
@@ -237,21 +267,10 @@ html.spotlight-on * {
   text-align: center;
 }
 
-/* ——— curtain ——— */
-
-.curtain-half {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 51%;
-  z-index: 30;
-  background:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.028) 0 7px, rgba(0, 0, 0, 0) 7px 26px),
-    linear-gradient(90deg, #0c0c0c, #050505);
+/* gap between the two about paragraphs */
+.about-para + .about-para {
+  margin-top: 1.5em;
 }
-
-.curtain-half.left-half { left: 0; }
-.curtain-half.right-half { right: 0; }
 
 /* ——— services: click a category, its explanation takes its place ——— */
 
@@ -259,58 +278,44 @@ html.spotlight-on * {
   display: flex;
   gap: clamp(40px, 8vw, 120px);
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
 }
 
+/* category stays put; its explanation hangs absolutely beneath it */
 .service {
   position: relative;
   text-align: center;
-  min-width: 220px;
-  min-height: 150px;
+  min-width: 200px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
 }
 
-.service .pool {
-  position: absolute;
-  left: 50%;
-  top: -130px;
-  width: 420px;
-  height: 420px;
-  transform: translateX(-50%);
-  background: radial-gradient(circle at center, rgba(242, 240, 235, 0.07), transparent 62%);
-  pointer-events: none;
-}
-
-.service .flip {
-  display: grid;
-  place-items: center;
-}
-
-.service .flip > * {
-  grid-area: 1 / 1;
-}
-
-.service h2 {
+.service-cat {
   font-size: var(--text);
   font-weight: var(--weight-heavy);
   letter-spacing: 0.28em;
-  text-transform: uppercase;
   transition: text-shadow 0.5s ease;
+  cursor: pointer;
 }
 
-.service:hover h2 {
+.service:hover .service-cat {
   text-shadow: 0 0 24px rgba(242, 240, 235, 0.4);
 }
 
-.service ul {
+.service-explain {
+  position: absolute;
+  top: calc(100% + clamp(18px, 4vh, 34px));
+  left: 50%;
+  transform: translateX(-50%);
   list-style: none;
   font-size: 12px;
   letter-spacing: 0.06em;
   line-height: 1.9;
   color: var(--ink-dim);
+  width: max-content;
+  max-width: 80vw;
   pointer-events: none;
 }
 
@@ -491,6 +496,13 @@ html.spotlight-on * {
 
   .services { flex-direction: column; align-items: center; gap: 28px; }
   .service { min-height: 0; }
+  /* in a stacked column, let the explanation flow inline instead of overlapping the next category */
+  .service-explain {
+    position: static;
+    transform: none;
+    margin-top: 12px;
+    max-width: 86vw;
+  }
   .team-names { flex-direction: column; gap: 30px; }
   .team-detail img { width: 130px; }
 

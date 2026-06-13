@@ -19,7 +19,7 @@ import Services from "@/components/Services";
 import Clients from "@/components/Clients";
 import Team from "@/components/Team";
 import Contact from "@/components/Contact";
-import Chrome from "@/components/Chrome";
+import FooterMark from "@/components/FooterMark";
 
 const LAST = STAGE_ORDER.length - 1;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
@@ -194,28 +194,28 @@ export default function Theater({ initialStage }: { initialStage: StageId }) {
   return (
     <main className="theater">
       <StageLayer index={0} z={z} active={active === 0} label="Home" blurScale={blurScale}>
-        <Name showCurtain={initialIndex === 0} reduce={reduce} />
+        <Name reduce={reduce} />
       </StageLayer>
       <StageLayer index={1} z={z} active={active === 1} label="Home" blurScale={blurScale}>
-        <Tagline />
+        <Tagline active={active === 1} />
       </StageLayer>
       <StageLayer index={2} z={z} active={active === 2} label="About" blurScale={blurScale}>
-        <About />
+        <About active={active === 2} />
       </StageLayer>
       <StageLayer index={3} z={z} active={active === 3} label="Services" blurScale={blurScale}>
-        <Services reduce={reduce} active={active === 3} />
+        <Services active={active === 3} />
       </StageLayer>
       <StageLayer index={4} z={z} active={active === 4} label="Clients" blurScale={blurScale}>
         <Clients />
       </StageLayer>
       <StageLayer index={5} z={z} active={active === 5} label="Team" blurScale={blurScale}>
-        <Team />
+        <Team active={active === 5} />
       </StageLayer>
       <StageLayer index={6} z={z} active={active === 6} label="Contact" blurScale={blurScale}>
         <Contact reduce={reduce} active={active === 6} />
       </StageLayer>
 
-      <Chrome stage={STAGE_ORDER[active]} />
+      <FooterMark active={active} />
     </main>
   );
 }

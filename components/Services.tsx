@@ -1,52 +1,75 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { COPY } from "@/lib/stages";
+import TextGenerateEffect from "@/components/TextGenerateEffect";
 
-/** Three services; clicking crossfades the category and its explanation, both directions. */
-export default function Services({ reduce, active }: { reduce: boolean; active: boolean }) {
+/** Reveals each explanation line only after the previous one finishes. */
+function ExplainList({ items }: { items: string[] }) {
+  const [shown, setShown] = useState(0);
+  return (
+    <ul className="service-explain">
+      {items.map((item, idx) => (
+        <li key={item}>
+          {idx <= shown ? (
+            <TextGenerateEffect
+              words={item}
+              by="chars"
+              duration={0.55}
+              staggerDelay={0.016}
+              onComplete={idx === shown ? () => setShown((v) => Math.max(v, idx + 1)) : undefined}
+            />
+          ) : (
+            <span style={{ opacity: 0 }}>{item}</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Three categories that reveal one after another; clicking one reveals its explanation underneath. */
+export default function Services({ active }: { active: boolean }) {
   const [open, setOpen] = useState<Record<number, boolean>>({});
+  // catPhase = how many categories are allowed to start revealing
+  const [catPhase, setCatPhase] = useState(0);
   const toggle = (i: number) => setOpen((prev) => ({ ...prev, [i]: !prev[i] }));
+
+  // restart the reveal sequence (and close everything) each time we enter/leave
+  useEffect(() => {
+    setOpen({});
+    setCatPhase(0);
+  }, [active]);
 
   return (
     <div className="services">
       {COPY.services.map((service, i) => {
-        const delay = reduce ? 0.1 + i * 0.15 : 0.3 + i * 0.5;
         const isOpen = !!open[i];
+        const revealed = active && catPhase >= i;
         return (
-          <motion.button
-            type="button"
-            className="service"
-            key={service.name}
-            onClick={() => toggle(i)}
-            initial={false}
-            animate={{ opacity: active ? 1 : 0 }}
-            transition={{ duration: reduce ? 0.4 : 1.0, delay: active ? delay : 0, ease: "easeOut" }}
-            aria-expanded={isOpen}
-          >
-            {!reduce && <span className="pool" aria-hidden="true" />}
-            <span className="flip">
-              <motion.h2
-                initial={false}
-                animate={{ opacity: isOpen ? 0 : 1 }}
-                transition={{ duration: 0.45, delay: isOpen ? 0 : 0.3, ease: "easeOut" }}
-                aria-hidden={isOpen}
-              >
-                {service.name}
-              </motion.h2>
-              <motion.ul
-                initial={false}
-                animate={{ opacity: isOpen ? 1 : 0 }}
-                transition={{ duration: 0.45, delay: isOpen ? 0.3 : 0, ease: "easeOut" }}
-                aria-hidden={!isOpen}
-              >
-                {service.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </motion.ul>
-            </span>
-          </motion.button>
+          <div className="service" key={service.name}>
+            <button
+              type="button"
+              className="service-cat"
+              onClick={() => toggle(i)}
+              aria-expanded={isOpen}
+            >
+              {revealed ? (
+                <TextGenerateEffect
+                  words={service.name}
+                  by="chars"
+                  duration={0.6}
+                  staggerDelay={0.03}
+                  // when this category finishes, let the next one start
+                  onComplete={() => setCatPhase((p) => Math.max(p, i + 1))}
+                />
+              ) : (
+                <span style={{ opacity: 0 }}>{service.name}</span>
+              )}
+            </button>
+
+            {isOpen && <ExplainList items={service.items} />}
+          </div>
         );
       })}
     </div>

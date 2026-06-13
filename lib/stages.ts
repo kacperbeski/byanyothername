@@ -65,13 +65,15 @@ export const STAGE_META: Record<StageId, { title: string; description: string; l
 /* ——— Verbatim copy ——— */
 
 export const COPY = {
-  wordmark: "By Any Other Name",
+  wordmark: "by any other name",
   tagline: [
     "Concepts, productions and identities for the spaces in between.",
     "A creative studio for brands, venues and what happens after dark.",
   ],
-  about:
-    "We develop original concepts — from after-hours clubs to immersive brand worlds — and produce them end-to-end. Our work sits at the intersection of business, art, and culture, made for hotels, venues, and brands who want their spaces to be remembered, not just visited.",
+  about: [
+    "We develop original concepts — from after-hours clubs to immersive brand worlds — and produce them end-to-end.",
+    "Our work sits at the intersection of business, art, and culture, made for hotels, venues, and brands who want their spaces to be remembered, not just visited.",
+  ],
   services: [
     {
       name: "Creative",
