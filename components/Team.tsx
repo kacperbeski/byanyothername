@@ -52,7 +52,7 @@ export default function Team() {
                 className="team-photo"
                 src={person.photo}
                 alt={`${person.name}, black and white portrait`}
-                loading="lazy"
+                decoding="async"
               />
               <h2 className="team-name as-label">{person.name}</h2>
               <p className="team-bio">{person.bio}</p>

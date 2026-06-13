@@ -29,14 +29,12 @@ function StageLayer({
   index,
   z,
   active,
-  reduce,
   label,
   children,
 }: {
   index: number;
   z: MotionValue<number>;
   active: boolean;
-  reduce: boolean;
   label: string;
   children: ReactNode;
 }) {
@@ -48,9 +46,8 @@ function StageLayer({
   const scale = useTransform(d, [-1, 0, 1], [1.5, 1, 0.95]);
   const visibility = useTransform(opacity, (o) => (o < 0.012 ? "hidden" : "visible")) as MotionValue<"hidden" | "visible">;
 
-  const style = reduce
-    ? { opacity, visibility }
-    : { opacity, filter, scale, visibility };
+  // always render the depth (blur + scale + opacity) so the effect shows on mobile too
+  const style = { opacity, filter, scale, visibility };
 
   return (
     <motion.section
@@ -183,29 +180,29 @@ export default function Theater({ initialStage }: { initialStage: StageId }) {
 
   return (
     <main className="theater">
-      <StageLayer index={0} z={z} active={active === 0} reduce={reduce} label="Home">
+      <StageLayer index={0} z={z} active={active === 0} label="Home">
         <Name showCurtain={initialIndex === 0} reduce={reduce} />
       </StageLayer>
-      <StageLayer index={1} z={z} active={active === 1} reduce={reduce} label="Home">
+      <StageLayer index={1} z={z} active={active === 1} label="Home">
         <Tagline />
       </StageLayer>
-      <StageLayer index={2} z={z} active={active === 2} reduce={reduce} label="About">
+      <StageLayer index={2} z={z} active={active === 2} label="About">
         <About />
       </StageLayer>
-      <StageLayer index={3} z={z} active={active === 3} reduce={reduce} label="Services">
+      <StageLayer index={3} z={z} active={active === 3} label="Services">
         <Services reduce={reduce} active={active === 3} />
       </StageLayer>
-      <StageLayer index={4} z={z} active={active === 4} reduce={reduce} label="Clients">
+      <StageLayer index={4} z={z} active={active === 4} label="Clients">
         <Clients />
       </StageLayer>
-      <StageLayer index={5} z={z} active={active === 5} reduce={reduce} label="Team">
+      <StageLayer index={5} z={z} active={active === 5} label="Team">
         <Team />
       </StageLayer>
-      <StageLayer index={6} z={z} active={active === 6} reduce={reduce} label="Contact">
+      <StageLayer index={6} z={z} active={active === 6} label="Contact">
         <Contact reduce={reduce} active={active === 6} />
       </StageLayer>
 
-      <Chrome index={active} total={STAGE_ORDER.length} stage={STAGE_ORDER[active]} onStep={step} />
+      <Chrome stage={STAGE_ORDER[active]} />
     </main>
   );
 }

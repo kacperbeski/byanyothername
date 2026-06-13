@@ -3,18 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { type StageId } from "@/lib/stages";
 
-/** Footer line bottom center (fades on change) + step arrows. */
-export default function Chrome({
-  index,
-  total,
-  stage,
-  onStep,
-}: {
-  index: number;
-  total: number;
-  stage: StageId;
-  onStep: (dir: 1 | -1) => void;
-}) {
+/** Footer line, bottom center (fades on change). */
+export default function Chrome({ stage }: { stage: StageId }) {
   const footer = stage === "contact" ? "Los Angeles" : "© By Any Other Name 2026";
 
   return (
@@ -31,25 +21,6 @@ export default function Chrome({
             {footer}
           </motion.span>
         </AnimatePresence>
-      </div>
-
-      <div className="corner br steppers">
-        <button
-          type="button"
-          onClick={() => onStep(-1)}
-          disabled={index === 0}
-          aria-label="previous page"
-        >
-          ↑
-        </button>
-        <button
-          type="button"
-          onClick={() => onStep(1)}
-          disabled={index === total - 1}
-          aria-label="next page"
-        >
-          ↓
-        </button>
       </div>
     </div>
   );
