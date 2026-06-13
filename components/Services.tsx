@@ -4,42 +4,86 @@ import { useEffect, useState } from "react";
 import { COPY } from "@/lib/stages";
 import TextGenerateEffect from "@/components/TextGenerateEffect";
 
-/** Reveals each explanation line only after the previous one finishes. */
-function ExplainList({ items }: { items: string[] }) {
-  const [shown, setShown] = useState(0);
+/** Reveals each explanation line only after the previous one finishes; calls onDone at the end. */
+function ExplainList({
+  items,
+  start = true,
+  onDone,
+}: {
+  items: string[];
+  start?: boolean;
+  onDone?: () => void;
+}) {
+  const [shown, setShown] = useState(start ? 0 : -1);
+  useEffect(() => {
+    if (start) setShown((s) => (s < 0 ? 0 : s));
+  }, [start]);
+
   return (
     <ul className="service-explain">
-      {items.map((item, idx) => (
-        <li key={item}>
-          {idx <= shown ? (
-            <TextGenerateEffect
-              words={item}
-              by="chars"
-              duration={0.55}
-              staggerDelay={0.016}
-              onComplete={idx === shown ? () => setShown((v) => Math.max(v, idx + 1)) : undefined}
-            />
-          ) : (
-            <span style={{ opacity: 0 }}>{item}</span>
-          )}
-        </li>
-      ))}
+      {items.map((item, idx) => {
+        const revealed = start && idx <= shown;
+        return (
+          <li key={item}>
+            {revealed ? (
+              <TextGenerateEffect
+                words={item}
+                by="chars"
+                duration={0.55}
+                staggerDelay={0.016}
+                onComplete={
+                  idx === shown
+                    ? () => {
+                        if (idx + 1 < items.length) setShown(idx + 1);
+                        else onDone?.();
+                      }
+                    : undefined
+                }
+              />
+            ) : (
+              <span style={{ opacity: 0 }}>{item}</span>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }
 
-/** Three categories that reveal one after another; clicking one reveals its explanation underneath. */
+/**
+ * Desktop: categories reveal in sequence; click one to reveal its explanation (absolutely
+ * positioned, so nothing moves).
+ * Mobile: everything is laid out in its final place — the three categories reveal one after
+ * another, then all the explanations reveal one by one. No tapping, no jumping.
+ */
 export default function Services({ active }: { active: boolean }) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   const [open, setOpen] = useState<Record<number, boolean>>({});
-  // catPhase = how many categories are allowed to start revealing
-  const [catPhase, setCatPhase] = useState(0);
+  const [catPhase, setCatPhase] = useState(0); // how many categories may reveal
+  const [explainPhase, setExplainPhase] = useState(-1); // mobile: which category's explanation is revealing
   const toggle = (i: number) => setOpen((prev) => ({ ...prev, [i]: !prev[i] }));
 
-  // restart the reveal sequence (and close everything) each time we enter/leave
+  // restart the sequence on enter/leave (or when the layout mode changes)
   useEffect(() => {
     setOpen({});
     setCatPhase(0);
-  }, [active]);
+    setExplainPhase(-1);
+  }, [active, isMobile]);
+
+  // on mobile, once all categories have revealed, kick off the explanations
+  useEffect(() => {
+    if (isMobile && active && catPhase >= COPY.services.length && explainPhase < 0) {
+      setExplainPhase(0);
+    }
+  }, [isMobile, active, catPhase, explainPhase]);
 
   return (
     <div className="services">
@@ -51,8 +95,8 @@ export default function Services({ active }: { active: boolean }) {
             <button
               type="button"
               className="service-cat"
-              onClick={() => toggle(i)}
-              aria-expanded={isOpen}
+              onClick={() => !isMobile && toggle(i)}
+              aria-expanded={isMobile ? true : isOpen}
             >
               {revealed ? (
                 <TextGenerateEffect
@@ -60,7 +104,6 @@ export default function Services({ active }: { active: boolean }) {
                   by="chars"
                   duration={0.6}
                   staggerDelay={0.03}
-                  // when this category finishes, let the next one start
                   onComplete={() => setCatPhase((p) => Math.max(p, i + 1))}
                 />
               ) : (
@@ -68,7 +111,15 @@ export default function Services({ active }: { active: boolean }) {
               )}
             </button>
 
-            {isOpen && <ExplainList items={service.items} />}
+            {isMobile ? (
+              <ExplainList
+                items={service.items}
+                start={explainPhase >= i}
+                onDone={() => setExplainPhase((p) => Math.max(p, i + 1))}
+              />
+            ) : (
+              isOpen && <ExplainList items={service.items} />
+            )}
           </div>
         );
       })}
